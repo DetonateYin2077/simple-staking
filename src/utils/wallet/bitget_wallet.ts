@@ -40,15 +40,14 @@ export class BitgetWallet extends WalletProvider {
     const address = await this.getAddress()
     const publicKeyHex = await this.getPublicKeyHex()
 
-    if (address && publicKeyHex) {
-      this.bitgetWalletInfo = {
-        publicKeyHex,
-        address,
-      };
-      return this;
-    } else {
+    if (!address || !publicKeyHex) {
       throw new Error("Could not connect to Bitget Wallet");
     }
+    this.bitgetWalletInfo = {
+      publicKeyHex,
+      address,
+    };
+    return this;
   };
 
   getWalletProviderName = async (): Promise<string> => {
@@ -90,8 +89,9 @@ export class BitgetWallet extends WalletProvider {
       console.log('babylon-signPsbt failed', error)
     }
 
-    let transaction = psbt.extractTransaction()
-    return transaction.toHex()
+    // let transaction = psbt.extractTransaction()
+    // return transaction.toHex()
+    return psbt.toHex()
   };
 
   signPsbts = async (psbtsHexes: string[]): Promise<string[]> => {
@@ -109,7 +109,7 @@ export class BitgetWallet extends WalletProvider {
         from: this.provider?.selectedAddress,
         __internalFunc: '__signPsbts_babylon',
         psbtHex: '_',
-        psbtsHexes,
+        psbtsHexs: psbtsHexes,
         options
       }
     }
@@ -124,9 +124,11 @@ export class BitgetWallet extends WalletProvider {
         } catch (error) {
           console.log('babylon-signPsbts failed', error)
         }
+        // return psbt
 
-        let transaction = psbt.extractTransaction()
-        return transaction.toHex()
+        // let transaction = psbt.extractTransaction()
+        // return transaction.toHex()
+        return psbt.toHex()
       })
     } catch (error) {
       throw new Error((error as Error)?.message)
