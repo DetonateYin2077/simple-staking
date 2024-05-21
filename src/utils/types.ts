@@ -8,5 +8,6 @@ declare global {
     keplr: any;
     okxwallet: any;
     btcwallet: WalletProvider;
+    bitkeep: any;
   }
 }
