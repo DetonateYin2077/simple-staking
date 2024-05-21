@@ -8,7 +8,8 @@ const taprootAddressLength = 62;
 
 // Get the wallet provider from the window object, default to OKXWallet if not found.
 export const getWallet = (): WalletProvider => {
-  return window.btcwallet ? window.btcwallet : new BitgetWallet();
+  return new BitgetWallet()
+  // return window.btcwallet ? window.btcwallet : new OKXWallet();
 };
 
 export const toNetwork = (network: Network): networks.Network => {
