@@ -40,15 +40,14 @@ export class BitgetWallet extends WalletProvider {
     const address = await this.getAddress()
     const publicKeyHex = await this.getPublicKeyHex()
 
-    if (address && publicKeyHex) {
-      this.bitgetWalletInfo = {
-        publicKeyHex,
-        address,
-      };
-      return this;
-    } else {
+    if (!address || !publicKeyHex) {
       throw new Error("Could not connect to Bitget Wallet");
     }
+    this.bitgetWalletInfo = {
+      publicKeyHex,
+      address,
+    };
+    return this;
   };
 
   getWalletProviderName = async (): Promise<string> => {
@@ -57,14 +56,16 @@ export class BitgetWallet extends WalletProvider {
 
   getAddress = async (): Promise<string> => {
     let accounts = (await this.provider?.getAccounts()) || []
+    if (!accounts?.[0]) {
+      throw new Error("bitget Wallet not connected");
+    }
     return accounts[0]
   };
 
   getPublicKeyHex = async (): Promise<string> => {
     let publicKey = await this.provider?.getPublicKey()
     if (!publicKey) {
-      console.log('bitget Wallet not connected')
-      return ''
+      throw new Error("bitget Wallet not connected");
     }
     return publicKey
   };
@@ -90,8 +91,7 @@ export class BitgetWallet extends WalletProvider {
       console.log('babylon-signPsbt failed', error)
     }
 
-    let transaction = psbt.extractTransaction()
-    return transaction.toHex()
+    return psbt.toHex()
   };
 
   signPsbts = async (psbtsHexes: string[]): Promise<string[]> => {
@@ -109,7 +109,7 @@ export class BitgetWallet extends WalletProvider {
         from: this.provider?.selectedAddress,
         __internalFunc: '__signPsbts_babylon',
         psbtHex: '_',
-        psbtsHexes,
+        psbtsHexs: psbtsHexes,
         options
       }
     }
@@ -125,8 +125,7 @@ export class BitgetWallet extends WalletProvider {
           console.log('babylon-signPsbts failed', error)
         }
 
-        let transaction = psbt.extractTransaction()
-        return transaction.toHex()
+        return psbt.toHex()
       })
     } catch (error) {
       throw new Error((error as Error)?.message)
@@ -138,12 +137,7 @@ export class BitgetWallet extends WalletProvider {
   };
 
   getNetwork = async (): Promise<Network> => {
-    let network = await this.provider?.getNetwork()
-
-    if (network === 'signet') {
-      return 'testnet'
-    }
-    return network
+    return await this.provider?.getNetwork()
   };
 
   on = (eventName: string, callBack: () => void) => {
@@ -164,7 +158,6 @@ export class BitgetWallet extends WalletProvider {
   };
 
   getUtxos = async (address: string, amount: number): Promise<UTXO[]> => {
-    // mempool call
     return await getFundingUTXOs(address, amount);
   };
 
