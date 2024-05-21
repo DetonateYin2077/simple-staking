@@ -7,7 +7,7 @@ import { Fees, UTXO } from "./wallet/wallet_provider";
 // Utilises an environment variable specifying the mempool API we intend to
 // utilise
 // const mempoolAPI = `${process.env.NEXT_PUBLIC_MEMPOOL_API}/signet/api/`;
-const mempoolAPI = `https://babylon.mempool.space/api/`;
+const mempoolAPI = `https://babylon.mempool.space/signet/api/`;
 
 // URL for the address info endpoint
 function addressInfoUrl(address: string): URL {
