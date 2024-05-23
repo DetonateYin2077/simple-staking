@@ -111,7 +111,7 @@ export const Delegation: React.FC<DelegationProps> = ({
         <p>{durationTillNow(startTimestamp)}</p>
         <div className="hidden justify-center lg:flex">
           <a
-            href={`${process.env.NEXT_PUBLIC_MEMPOOL_API}/signet/tx/${stakingTxHash}`}
+            href={`https://babylon.mempool.space/signet/tx/${stakingTxHash}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary hover:underline"
