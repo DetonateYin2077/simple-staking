@@ -20,6 +20,20 @@ export class BitgetWallet extends WalletProvider {
     super();
   }
 
+  // Private method to check if an input is finalized
+  private isInputFinalized(input:any) {
+    return (
+      input.finalScriptWitness ||
+      input.finalScriptSig ||
+      (input.witnessUtxo && input.tapKeySig) || // Taproot single sig
+      (input.witnessUtxo && input.tapScriptSig && input.tapLeafScript) || // Taproot script path
+      (input.nonWitnessUtxo && input.finalScriptSig) || // Legacy P2PKH or P2SH
+      (input.redeemScript && (input.finalScriptWitness || input.finalScriptSig)) || // P2SH or P2WSH
+      (input.witnessScript && input.finalScriptWitness) // P2WSH
+    );
+  }
+
+
   connectWallet = async (): Promise<any> => {
     // check whether there is an Bitget Wallet extension
     if (!this.provider) {
@@ -86,7 +100,12 @@ export class BitgetWallet extends WalletProvider {
     let signedPsbt = await this.provider?.request('dappsSign', data)
     let psbt = Psbt.fromHex(signedPsbt)
     try {
-      psbt.finalizeAllInputs()
+      const allFinalized = psbt.data.inputs.every(input => {
+        return this.isInputFinalized(input);
+      });
+      if(!allFinalized){
+        psbt.finalizeAllInputs()
+      }
     } catch (error) {
       console.log('babylon-signPsbt failed', error)
     }
@@ -120,7 +139,12 @@ export class BitgetWallet extends WalletProvider {
       return signedPsbts.map((tx:string) => {
         let psbt = Psbt.fromHex(tx)
         try {
-          psbt.finalizeAllInputs()
+          const allFinalized = psbt.data.inputs.every(input => {
+            return this.isInputFinalized(input);
+          });
+          if(!allFinalized){
+            psbt.finalizeAllInputs()
+          }
         } catch (error) {
           console.log('babylon-signPsbts failed', error)
         }
@@ -142,6 +166,9 @@ export class BitgetWallet extends WalletProvider {
   };
 
   on = (eventName: string, callBack: () => void) => {
+    if(eventName === 'accountChanged'){
+      return this.provider?.on('accountsChanged', callBack);
+    }
     return this.provider?.on(eventName, callBack);
   };
 
