@@ -1,21 +1,19 @@
 import { Psbt } from 'bitcoinjs-lib'
-import { WalletProvider, Network, Fees, UTXO } from "./wallet_provider";
+import { WalletProvider, Network, Fees, UTXO, WalletInfo, } from "../wallet_provider";
 import {
   getAddressBalance,
   getTipHeight,
   getFundingUTXOs,
   getNetworkFees,
   pushTx,
-} from "../mempool_api";
+} from "../../mempool_api";
 
-type BitgetWalletInfo = {
-  publicKeyHex: string;
-  address: string;
-};
+// window object for Bitget Wallet extension
+export const bitgetWalletProvider = "bitkeep";
 
 export class BitgetWallet extends WalletProvider {
-  private bitgetWalletInfo: BitgetWalletInfo | undefined;
-  private provider = window?.bitkeep?.unisat
+  private bitgetWalletInfo: WalletInfo | undefined;
+  private provider = window?.[bitgetWalletProvider]?.unisat
   constructor() {
     super();
   }
